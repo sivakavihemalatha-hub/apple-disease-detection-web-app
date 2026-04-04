@@ -15,7 +15,7 @@ UPLOAD_FOLDER = "static/uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 # 🔥 LOAD MODEL
-model = tf.keras.models.load_model("model/best_model.h5", compile=False)
+model = tf.keras.models.load_model("model/best_model", compile=False)
 
 class_names = ['Anthracnose', 'Black Pox', 'Black Rot', 'Healthy', 'Powdery Mildew']
 
@@ -287,6 +287,4 @@ def logout():
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-    init_db()
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=7860)
