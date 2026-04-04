@@ -15,7 +15,9 @@ UPLOAD_FOLDER = "static/uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 # 🔥 LOAD MODEL
-model = tf.keras.models.load_model("model/best_model", compile=False)
+#model = tf.keras.models.load_model("model/best_model", compile=False)
+import keras
+model = keras.saving.load_model("model/best_model")
 
 class_names = ['Anthracnose', 'Black Pox', 'Black Rot', 'Healthy', 'Powdery Mildew']
 
