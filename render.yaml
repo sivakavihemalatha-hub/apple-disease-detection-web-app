@@ -2,5 +2,8 @@ services:
   - type: web
     name: smartagri
     env: python
-    buildCommand: pip install -r requirements.txt
+    plan: free
+    region: singapore
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
     startCommand: gunicorn app:app
+    runtime: python-3.10.13
