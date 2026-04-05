@@ -20,12 +20,17 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 MODEL_PATH = os.path.join(BASE_DIR, "best_model.h5")
 
 # ---------------- LOAD MODEL ----------------
+model = None
 try:
+    print("MODEL PATH:", MODEL_PATH)
+    print("EXISTS:", os.path.exists(MODEL_PATH))
+
     model = tf.keras.models.load_model(MODEL_PATH, compile=False)
     print("✅ Model loaded successfully")
 except Exception as e:
     print("❌ Model loading failed:", e)
     model = None
+
 
 # ---------------- CLASS LABELS ----------------
 class_names = ['Anthracnose', 'Black Pox', 'Black Rot', 'Healthy', 'Powdery Mildew']
@@ -91,6 +96,7 @@ def login():
         if user:
             session["user_id"] = user[0]
             session["role"] = user[1]
+            session["username"] = user[0]   # FIX ONLY
             return redirect("/dashboard")
 
         return "Invalid credentials"
@@ -145,17 +151,15 @@ def upload():
     filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
     file.save(filepath)
 
-    # ❗ CHECK MODEL
     if model is None:
         return "Model not loaded"
 
-    # ---------------- IMAGE PREPROCESS ----------------
+    # IMAGE PROCESS
     img = Image.open(filepath).convert("RGB")
-    img = img.resize((224, 224))  # correct size
+    img = img.resize((224, 224))
     img = np.array(img) / 255.0
     img = np.expand_dims(img, axis=0)
 
-    # ---------------- FIXED PREDICTION (IMPORTANT) ----------------
     img_tensor = tf.convert_to_tensor(img)
     preds = model(img_tensor, training=False).numpy()[0]
 
@@ -174,7 +178,9 @@ def upload():
 
     prevention = prevention_dict[prediction]
 
-    # ---------------- SAVE HISTORY ----------------
+    # SAVE HISTORY (ONLY FIX PATH)
+    db_image_path = "static/uploads/" + filename
+
     conn = sqlite3.connect("database.db")
     cur = conn.cursor()
 
@@ -183,7 +189,7 @@ def upload():
         VALUES (?, ?, ?, ?, ?)
     """, (
         session["user_id"],
-        filepath,
+        db_image_path,
         prediction,
         confidence,
         str(datetime.now())
@@ -194,7 +200,7 @@ def upload():
 
     return render_template(
         "dashboard.html",
-        image=filepath,
+        image=db_image_path,
         prediction=prediction,
         confidence=confidence,
         prevention=prevention
@@ -267,12 +273,13 @@ def profile():
 
     return render_template(
         "profile.html",
-        username=session["user_id"],
+        username=session["username"],
         email=session["user_id"],
         profile_pic=session.get("profile_pic")
     )
 
 
+# ---------------- UPLOAD PROFILE ----------------
 @app.route("/upload_profile", methods=["POST"])
 def upload_profile():
     if "user_id" not in session:
@@ -284,10 +291,10 @@ def upload_profile():
         return redirect("/profile")
 
     filename = "profile_" + session["user_id"] + ".jpg"
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
     file.save(filepath)
 
-    session["profile_pic"] = filepath
+    session["profile_pic"] = "static/uploads/" + filename
 
     return redirect("/profile")
 
