@@ -24,8 +24,7 @@ model = None
 try:
     model = tf.keras.models.load_model(
         MODEL_PATH,
-        compile=False,
-        custom_objects={},
+        compile=False
     )
     print("✅ Model loaded successfully")
 except Exception as e:
