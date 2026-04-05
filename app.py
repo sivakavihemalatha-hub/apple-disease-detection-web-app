@@ -19,13 +19,18 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 MODEL_PATH = os.path.join(BASE_DIR, "best_model.h5")
 
-# ---------------- LOAD MODEL ----------------
+# ---------------- LOAD MODEL (FIXED ONLY HERE) ----------------
 model = None
 
 try:
     model = tf.keras.models.load_model(
         MODEL_PATH,
-        compile=False
+        compile=False,
+        custom_objects={
+            "Dense": lambda **kwargs: tf.keras.layers.Dense(
+                **{k: v for k, v in kwargs.items() if k != "quantization_config"}
+            )
+        }
     )
     print("✅ Model loaded successfully")
 
@@ -98,7 +103,7 @@ def login():
         if user:
             session["user_id"] = user[0]
             session["role"] = user[1]
-            session["username"] = user[0]   # FIX ONLY
+            session["username"] = user[0]
             return redirect("/dashboard")
 
         return "Invalid credentials"
@@ -180,7 +185,6 @@ def upload():
 
     prevention = prevention_dict[prediction]
 
-    # SAVE HISTORY (ONLY FIX PATH)
     db_image_path = "static/uploads/" + filename
 
     conn = sqlite3.connect("database.db")
@@ -310,6 +314,6 @@ def logout():
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
-    init_db()   # 🔥 ADD THIS LINE
+    init_db()
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
