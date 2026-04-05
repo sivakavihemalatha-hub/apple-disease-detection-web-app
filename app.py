@@ -22,10 +22,11 @@ MODEL_PATH = os.path.join(BASE_DIR, "best_model.h5")
 # ---------------- LOAD MODEL ----------------
 model = None
 try:
-    print("MODEL PATH:", MODEL_PATH)
-    print("EXISTS:", os.path.exists(MODEL_PATH))
-
-    model = tf.keras.models.load_model(MODEL_PATH, compile=False)
+    model = tf.keras.models.load_model(
+        MODEL_PATH,
+        compile=False,
+        custom_objects={},
+    )
     print("✅ Model loaded successfully")
 except Exception as e:
     print("❌ Model loading failed:", e)
@@ -308,5 +309,6 @@ def logout():
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
+    init_db()   # 🔥 ADD THIS LINE
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
