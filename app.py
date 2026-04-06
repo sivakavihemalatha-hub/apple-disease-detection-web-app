@@ -149,74 +149,73 @@ def dashboard():
 # ---------------- UPLOAD & PREDICT ----------------
 @app.route("/upload", methods=["POST"])
 def upload():
-    if "user_id" not in session:
-        return redirect("/login")
+    try:
+        if "user_id" not in session:
+            return redirect("/login")
 
-    file = request.files["file"]
+        file = request.files["file"]
 
-    if file.filename == "":
+        if file.filename == "":
+            return redirect("/dashboard")
+
+        filename = datetime.now().strftime("%Y%m%d%H%M%S") + "_" + file.filename
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file.save(filepath)
+
+        if model is None:
+            return "Model not loaded"
+
+        # IMAGE PROCESS
+        img = Image.open(filepath).convert("RGB")
+        img = img.resize((224, 224))
+        img = np.array(img) / 255.0
+        img = np.expand_dims(img, axis=0)
+
+        preds = model.predict(img)[0]
+        idx = np.argmax(preds)
+
+        prediction = class_names[idx]
+        confidence = str(round(float(np.max(preds)) * 100, 2)) + "%"
+
+        prevention_dict = {
+            "Anthracnose": "Remove infected parts and use fungicide.",
+            "Black Pox": "Apply fungicide regularly.",
+            "Black Rot": "Prune affected areas.",
+            "Healthy": "No disease detected.",
+            "Powdery Mildew": "Use sulfur spray."
+        }
+
+        prevention = prevention_dict[prediction]
+
+        db_image_path = "static/uploads/" + filename
+
+        conn = sqlite3.connect("database.db")
+        cur = conn.cursor()
+
+        cur.execute("""
+            INSERT INTO history (username, image, prediction, confidence, date)
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            session["user_id"],
+            db_image_path,
+            prediction,
+            confidence,
+            str(datetime.now())
+        ))
+
+        conn.commit()
+        conn.close()
+
+        # session
+        session["image"] = db_image_path
+        session["prediction"] = prediction
+        session["confidence"] = confidence
+        session["prevention"] = prevention
+
         return redirect("/dashboard")
 
-    filename = datetime.now().strftime("%Y%m%d%H%M%S") + "_" + file.filename
-    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-    file.save(filepath)
-
-    if model is None:
-        return "Model not loaded"
-
-    # IMAGE PROCESS
-    img = Image.open(filepath).convert("RGB")
-    img = img.resize((224, 224))
-    img = np.array(img) / 255.0
-    img = np.expand_dims(img, axis=0)
-
-    img_tensor = tf.convert_to_tensor(img)
-    preds = model(img_tensor, training=False).numpy()[0]
-
-    idx = np.argmax(preds)
-
-    prediction = class_names[idx]
-    confidence = str(round(float(np.max(preds)) * 100, 2)) + "%"
-
-    prevention_dict = {
-        "Anthracnose": "Remove infected parts and use fungicide.",
-        "Black Pox": "Apply fungicide regularly.",
-        "Black Rot": "Prune affected areas.",
-        "Healthy": "No disease detected.",
-        "Powdery Mildew": "Use sulfur spray."
-    }
-
-    prevention = prevention_dict[prediction]
-
-    db_image_path = "static/uploads/" + filename
-
-    conn = sqlite3.connect("database.db")
-    cur = conn.cursor()
-
-    cur.execute("""
-        INSERT INTO history (username, image, prediction, confidence, date)
-        VALUES (?, ?, ?, ?, ?)
-    """, (
-        session["user_id"],
-        db_image_path,
-        prediction,
-        confidence,
-        str(datetime.now())
-    ))
-
-    conn.commit()
-    conn.close()
-
-    
-    # session update
-    session["image"] = db_image_path
-    session["prediction"] = prediction
-    session["confidence"] = confidence
-    session["prevention"] = prevention
-
-    # redirect
-    return redirect("/dashboard")
-
+    except Exception as e:
+        return f"ERROR OCCURRED: {str(e)}"
 
 # ---------------- HISTORY ----------------
 @app.route("/history")
