@@ -13,15 +13,16 @@ app.secret_key = "secret_key"
 # ---------------- PATH ----------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads")
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+DB_PATH = os.path.join(BASE_DIR, "database.db")   # ✅ FIXED
 
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 MODEL_PATH = os.path.join(BASE_DIR, "best_model.h5")
 
 # ---------------- DATABASE INIT ----------------
 def init_db():
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
 
     cur.execute("""
@@ -55,7 +56,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-# ✅ IMPORTANT: Always run DB init
+# ✅ Run DB init always
 init_db()
 
 # ---------------- LOAD MODEL ----------------
@@ -91,10 +92,10 @@ def home():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email = request.form["email"]
-        password = request.form["password"]
+        email = request.form.get("email")
+        password = request.form.get("password")
 
-        conn = sqlite3.connect("database.db")
+        conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
 
         cur.execute("SELECT email, role FROM users WHERE email=? AND password=?",
@@ -117,16 +118,19 @@ def login():
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
-        username = request.form["username"]
-        email = request.form["email"]
-        password = request.form["password"]
-        confirm = request.form["confirm"]
+        username = request.form.get("username")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        confirm = request.form.get("confirm")
+
+        if not username or not email or not password or not confirm:
+            return "All fields are required"
 
         if password != confirm:
             return "Passwords do not match"
 
         try:
-            conn = sqlite3.connect("database.db")
+            conn = sqlite3.connect(DB_PATH)
             cur = conn.cursor()
 
             cur.execute("""
@@ -141,6 +145,9 @@ def signup():
 
         except sqlite3.IntegrityError:
             return "Email already exists"
+
+        except Exception as e:
+            return f"Signup Error: {str(e)}"
 
     return render_template("signup.html")
 
@@ -160,7 +167,7 @@ def dashboard():
     )
 
 
-# ---------------- UPLOAD & PREDICT ----------------
+# ---------------- UPLOAD ----------------
 @app.route("/upload", methods=["POST"])
 def upload():
     try:
@@ -203,8 +210,7 @@ def upload():
 
         db_image_path = "static/uploads/" + filename
 
-        # Save history
-        conn = sqlite3.connect("database.db")
+        conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
 
         cur.execute("""
@@ -221,13 +227,7 @@ def upload():
         conn.commit()
         conn.close()
 
-        # Store session
-        session["image"] = db_image_path
-        session["prediction"] = prediction
-        session["confidence"] = confidence
-        session["prevention"] = prevention
-
-        # ✅ DIRECT RESPONSE (FIXES WHITE PAGE)
+        # Direct render (fix)
         return render_template(
             "dashboard.html",
             image=db_image_path,
@@ -246,7 +246,7 @@ def history():
     if "user_id" not in session:
         return redirect("/login")
 
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
@@ -267,7 +267,7 @@ def admin():
     if session["role"] != "admin":
         return redirect("/dashboard")
 
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
@@ -288,7 +288,7 @@ def delete(id):
     if session["role"] != "admin":
         return redirect("/dashboard")
 
-    conn = sqlite3.connect("database.db")
+    conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
 
     cur.execute("DELETE FROM history WHERE id=?", (id,))
@@ -296,20 +296,6 @@ def delete(id):
     conn.close()
 
     return redirect("/admin")
-
-
-# ---------------- PROFILE ----------------
-@app.route("/profile")
-def profile():
-    if "user_id" not in session:
-        return redirect("/login")
-
-    return render_template(
-        "profile.html",
-        username=session["username"],
-        email=session["user_id"],
-        profile_pic=session.get("profile_pic")
-    )
 
 
 # ---------------- LOGOUT ----------------
