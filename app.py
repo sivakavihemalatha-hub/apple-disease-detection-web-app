@@ -23,15 +23,20 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # ================= LOAD MODEL =================
 MODEL_PATH = os.path.join(BASE_DIR, "best_model.h5")
 
-model = tf.keras.models.load_model(
-    MODEL_PATH,
-    compile=False,
-    custom_objects={
-        "Dense": lambda **kwargs: tf.keras.layers.Dense(
-            **{k: v for k, v in kwargs.items() if k != "quantization_config"}
-        )
-    }
-)
+try:
+    model = tf.keras.models.load_model(
+        MODEL_PATH,
+        compile=False,
+        custom_objects={
+            "Dense": lambda **kwargs: tf.keras.layers.Dense(
+                **{k: v for k, v in kwargs.items() if k != "quantization_config"}
+            )
+        }
+    )
+    print("✅ Model loaded successfully")
+
+except Exception as e:
+    print("❌ Model loading failed:", e)
 
 class_names = ['Anthracnose', 'Black Pox', 'Black Rot', 'Healthy', 'Powdery Mildew']
 
@@ -80,7 +85,7 @@ def home():
     return render_template("home.html")
 
 
-# LOGIN
+# --------------LOGIN-----------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -104,7 +109,7 @@ def login():
     return render_template("login.html")
 
 
-# SIGNUP
+# ----------SIGNUP------------
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
@@ -134,7 +139,7 @@ def signup():
     return render_template("signup.html")
 
 
-# DASHBOARD
+#----------------- DASHBOARD----------------
 @app.route("/dashboard")
 def dashboard():
     if "user_id" not in session:
@@ -143,36 +148,56 @@ def dashboard():
     return render_template("dashboard.html")
 
 
-# UPLOAD + PREDICT
+#--------------- UPLOAD + PREDICT-----------------
 @app.route("/upload", methods=["POST"])
 def upload():
     try:
+        print("🔥 Upload route called")
+
+        # Check login
         if "user_id" not in session:
             return redirect("/login")
 
-        file = request.files["file"]
+        # Get file safely
+        file = request.files.get("file")
+
+        if file is None:
+            return "❌ No file received"
 
         if file.filename == "":
-            return redirect("/dashboard")
+            return "❌ No file selected"
 
-        # SAVE FILE
+        print("📁 File received:", file.filename)
+
+        # Save file
         filename = datetime.now().strftime("%Y%m%d%H%M%S") + "_" + file.filename
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         file.save(filepath)
 
-        # PREPROCESS IMAGE
+        print("✅ File saved at:", filepath)
+
+        # Check model
+        if model is None:
+            return "❌ Model not loaded"
+
+        # Process image
         img = Image.open(filepath).convert("RGB")
         img = img.resize((224, 224))
         img = np.array(img) / 255.0
         img = np.expand_dims(img, axis=0)
 
-        # PREDICTION
+        print("🧠 Running prediction...")
+
         preds = model.predict(img)[0]
         idx = np.argmax(preds)
 
         prediction = class_names[idx]
         confidence = str(round(float(np.max(preds)) * 100, 2)) + "%"
 
+        print("✅ Prediction:", prediction)
+        print("✅ Confidence:", confidence)
+
+        # Prevention
         prevention_dict = {
             "Anthracnose": "Remove infected parts and use fungicide.",
             "Black Pox": "Apply fungicide regularly.",
@@ -183,11 +208,10 @@ def upload():
 
         prevention = prevention_dict[prediction]
 
-        # IMPORTANT PATH
+        # Save to DB
         db_image_path = "static/uploads/" + filename
 
-        # SAVE HISTORY
-        conn = sqlite3.connect(DB_PATH)
+        conn = sqlite3.connect("database.db")
         cur = conn.cursor()
 
         cur.execute("""
@@ -204,7 +228,9 @@ def upload():
         conn.commit()
         conn.close()
 
-        # SHOW RESULT
+        print("💾 Saved to history")
+
+        # Show result on dashboard
         return render_template(
             "dashboard.html",
             image=db_image_path,
@@ -214,10 +240,10 @@ def upload():
         )
 
     except Exception as e:
-        return f"Error: {str(e)}"
+        print("❌ ERROR:", str(e))
+        return f"ERROR: {str(e)}"
 
-
-# USER HISTORY
+#--------------- USER HISTORY--------------------
 @app.route("/history")
 def history():
     if "user_id" not in session:
@@ -235,7 +261,7 @@ def history():
     return render_template("history.html", history=rows)
 
 
-# ADMIN PANEL
+# ------------------ADMIN PANEL-------------------
 @app.route("/admin")
 def admin():
     if "user_id" not in session:
@@ -256,7 +282,7 @@ def admin():
     return render_template("all_history.html", data=rows)
 
 
-# DELETE (ADMIN)
+# ----------------DELETE (ADMIN)---------------------------
 @app.route("/delete/<int:id>")
 def delete(id):
     if "user_id" not in session:
@@ -292,7 +318,7 @@ def profile():
     )
 
 
-# UPLOAD PROFILE IMAGE
+# --------------UPLOAD PROFILE IMAGE-----------------
 @app.route("/upload_profile", methods=["POST"])
 def upload_profile():
     if "user_id" not in session:
@@ -312,7 +338,7 @@ def upload_profile():
     return redirect("/profile")
 
 
-# LOGOUT
+#------------ LOGOUT---------------------
 @app.route("/logout")
 def logout():
     session.clear()
