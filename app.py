@@ -23,20 +23,27 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # ================= LOAD MODEL =================
 MODEL_PATH = os.path.join(BASE_DIR, "best_model.h5")
 
-try:
-    model = tf.keras.models.load_model(
-        MODEL_PATH,
-        compile=False,
-        custom_objects={
-            "Dense": lambda **kwargs: tf.keras.layers.Dense(
-                **{k: v for k, v in kwargs.items() if k != "quantization_config"}
-            )
-        }
-    )
-    print("✅ Model loaded successfully")
+# ✅ STEP 1: Check file FIRST
+if not os.path.exists(MODEL_PATH):
+    print("❌ MODEL FILE NOT FOUND:", MODEL_PATH)
+    model = None
+else:
+    try:
+        # ✅ STEP 2: Load model
+        model = tf.keras.models.load_model(
+            MODEL_PATH,
+            compile=False,
+            custom_objects={
+                "Dense": lambda **kwargs: tf.keras.layers.Dense(
+                    **{k: v for k, v in kwargs.items() if k != "quantization_config"}
+                )
+            }
+        )
+        print("✅ Model loaded successfully")
 
-except Exception as e:
-    print("❌ Model loading failed:", e)
+    except Exception as e:
+        print("❌ Model loading failed:", e)
+        model = None
 
 class_names = ['Anthracnose', 'Black Pox', 'Black Rot', 'Healthy', 'Powdery Mildew']
 
@@ -149,61 +156,37 @@ def dashboard():
 
 
 #--------------- UPLOAD + PREDICT-----------------
-@app.route("/upload", methods=["GET", "POST"])
+@app.route("/upload", methods=["POST"])
 def upload():
-
-    # 🔥 If someone opens /upload directly → redirect
-    if request.method == "GET":
-        return redirect("/dashboard")
 
     try:
         print("🔥 Upload route called")
 
-        # ✅ Check login
         if "user_id" not in session:
             return redirect("/login")
 
-        # ✅ Get file safely
         file = request.files.get("file")
 
-        if file is None:
-            return "❌ No file received"
-
-        if file.filename == "":
+        if file is None or file.filename == "":
             return "❌ No file selected"
 
-        print("📁 File received:", file.filename)
-
-        # ✅ Save file
         filename = datetime.now().strftime("%Y%m%d%H%M%S") + "_" + file.filename
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         file.save(filepath)
 
-        print("✅ File saved:", filepath)
+        print("✅ File saved")
 
-        # ✅ Check model
-        if model is None:
-            return "❌ Model not loaded"
-
-        # ✅ Image processing
         img = Image.open(filepath).convert("RGB")
         img = img.resize((224, 224))
         img = np.array(img) / 255.0
         img = np.expand_dims(img, axis=0)
 
-        print("🧠 Running prediction...")
-
-        # ✅ Prediction
         preds = model.predict(img)[0]
         idx = np.argmax(preds)
 
         prediction = class_names[idx]
         confidence = str(round(float(np.max(preds)) * 100, 2)) + "%"
 
-        print("✅ Prediction:", prediction)
-        print("✅ Confidence:", confidence)
-
-        # ✅ Prevention tips
         prevention_dict = {
             "Anthracnose": "Remove infected parts and use fungicide.",
             "Black Pox": "Apply fungicide regularly.",
@@ -214,11 +197,10 @@ def upload():
 
         prevention = prevention_dict[prediction]
 
-        # ✅ Path for frontend
         db_image_path = "static/uploads/" + filename
 
-        # ✅ Save to database
-        conn = sqlite3.connect("database.db")
+        # ✅ SAVE IN DATABASE
+        conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
 
         cur.execute("""
@@ -235,20 +217,19 @@ def upload():
         conn.commit()
         conn.close()
 
-        print("💾 Saved to history")
+        # ⭐ IMPORTANT: STORE IN SESSION
+        session["image"] = db_image_path
+        session["prediction"] = prediction
+        session["confidence"] = confidence
+        session["prevention"] = prevention
 
-        # ✅ Show result on dashboard
-        return render_template(
-            "dashboard.html",
-            image=db_image_path,
-            prediction=prediction,
-            confidence=confidence,
-            prevention=prevention
-        )
+        print("💾 Stored in session")
+
+        return redirect("/dashboard")
 
     except Exception as e:
         print("❌ ERROR:", str(e))
-        return f"ERROR: {str(e)}"
+        return str(e)
 
 #--------------- USER HISTORY--------------------
 @app.route("/history")
