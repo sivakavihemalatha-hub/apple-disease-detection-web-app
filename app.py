@@ -10,7 +10,7 @@ import tensorflow as tf
 app = Flask(__name__)
 app.secret_key = "secret_key"
 
-# ---------------- PATH FIX ----------------
+# ---------------- PATH ----------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads")
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
@@ -18,30 +18,6 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 MODEL_PATH = os.path.join(BASE_DIR, "best_model.h5")
-
-# ---------------- LOAD MODEL (FIXED ONLY HERE) ----------------
-model = None
-
-try:
-    model = tf.keras.models.load_model(
-        MODEL_PATH,
-        compile=False,
-        custom_objects={
-            "Dense": lambda **kwargs: tf.keras.layers.Dense(
-                **{k: v for k, v in kwargs.items() if k != "quantization_config"}
-            )
-        }
-    )
-    print("✅ Model loaded successfully")
-
-except Exception as e:
-    print("❌ Model loading failed:", e)
-    model = None
-
-
-# ---------------- CLASS LABELS ----------------
-class_names = ['Anthracnose', 'Black Pox', 'Black Rot', 'Healthy', 'Powdery Mildew']
-
 
 # ---------------- DATABASE INIT ----------------
 def init_db():
@@ -68,6 +44,7 @@ def init_db():
         )
     """)
 
+    # Default admin
     cur.execute("SELECT * FROM users WHERE email=?", ("admin@gmail.com",))
     if not cur.fetchone():
         cur.execute("""
@@ -77,6 +54,31 @@ def init_db():
 
     conn.commit()
     conn.close()
+
+# ✅ IMPORTANT: Always run DB init
+init_db()
+
+# ---------------- LOAD MODEL ----------------
+model = None
+
+try:
+    model = tf.keras.models.load_model(
+        MODEL_PATH,
+        compile=False,
+        custom_objects={
+            "Dense": lambda **kwargs: tf.keras.layers.Dense(
+                **{k: v for k, v in kwargs.items() if k != "quantization_config"}
+            )
+        }
+    )
+    print("✅ Model loaded successfully")
+
+except Exception as e:
+    print("❌ Model loading failed:", e)
+    model = None
+
+# ---------------- CLASS LABELS ----------------
+class_names = ['Anthracnose', 'Black Pox', 'Black Rot', 'Healthy', 'Powdery Mildew']
 
 
 # ---------------- HOME ----------------
@@ -106,7 +108,7 @@ def login():
             session["username"] = user[0]
             return redirect("/dashboard")
 
-        return "Invalid credentials"
+        return "Invalid credentials or please signup first"
 
     return render_template("login.html")
 
@@ -115,23 +117,33 @@ def login():
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
+        username = request.form["username"]
         email = request.form["email"]
         password = request.form["password"]
+        confirm = request.form["confirm"]
 
-        conn = sqlite3.connect("database.db")
-        cur = conn.cursor()
+        if password != confirm:
+            return "Passwords do not match"
 
-        cur.execute("""
-            INSERT INTO users (email, password, role)
-            VALUES (?, ?, ?)
-        """, (email, password, "user"))
+        try:
+            conn = sqlite3.connect("database.db")
+            cur = conn.cursor()
 
-        conn.commit()
-        conn.close()
+            cur.execute("""
+                INSERT INTO users (email, password, role)
+                VALUES (?, ?, ?)
+            """, (email, password, "user"))
 
-        return redirect("/login")
+            conn.commit()
+            conn.close()
+
+            return redirect("/login")
+
+        except sqlite3.IntegrityError:
+            return "Email already exists"
 
     return render_template("signup.html")
+
 
 # ---------------- DASHBOARD ----------------
 @app.route("/dashboard")
@@ -146,6 +158,8 @@ def dashboard():
         confidence=session.get("confidence"),
         prevention=session.get("prevention")
     )
+
+
 # ---------------- UPLOAD & PREDICT ----------------
 @app.route("/upload", methods=["POST"])
 def upload():
@@ -165,7 +179,7 @@ def upload():
         if model is None:
             return "Model not loaded"
 
-        # IMAGE PROCESS
+        # Image preprocessing
         img = Image.open(filepath).convert("RGB")
         img = img.resize((224, 224))
         img = np.array(img) / 255.0
@@ -189,6 +203,7 @@ def upload():
 
         db_image_path = "static/uploads/" + filename
 
+        # Save history
         conn = sqlite3.connect("database.db")
         cur = conn.cursor()
 
@@ -206,16 +221,24 @@ def upload():
         conn.commit()
         conn.close()
 
-        # session
+        # Store session
         session["image"] = db_image_path
         session["prediction"] = prediction
         session["confidence"] = confidence
         session["prevention"] = prevention
 
-        return redirect("/dashboard")
+        # ✅ DIRECT RESPONSE (FIXES WHITE PAGE)
+        return render_template(
+            "dashboard.html",
+            image=db_image_path,
+            prediction=prediction,
+            confidence=confidence,
+            prevention=prevention
+        )
 
     except Exception as e:
         return f"ERROR OCCURRED: {str(e)}"
+
 
 # ---------------- HISTORY ----------------
 @app.route("/history")
@@ -253,7 +276,7 @@ def admin():
 
     conn.close()
 
-    return render_template("all_history.html", data=rows)
+    return render_template("all_history.html", history=rows)
 
 
 # ---------------- DELETE ----------------
@@ -289,26 +312,6 @@ def profile():
     )
 
 
-# ---------------- UPLOAD PROFILE ----------------
-@app.route("/upload_profile", methods=["POST"])
-def upload_profile():
-    if "user_id" not in session:
-        return redirect("/login")
-
-    file = request.files["photo"]
-
-    if file.filename == "":
-        return redirect("/profile")
-
-    filename = "profile_" + session["user_id"] + ".jpg"
-    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-    file.save(filepath)
-
-    session["profile_pic"] = "static/uploads/" + filename
-
-    return redirect("/profile")
-
-
 # ---------------- LOGOUT ----------------
 @app.route("/logout")
 def logout():
@@ -318,6 +321,5 @@ def logout():
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
-    init_db()
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
