@@ -152,7 +152,13 @@ def dashboard():
     if "user_id" not in session:
         return redirect("/login")
 
-    return render_template("dashboard.html")
+    return render_template(
+        "dashboard.html",
+        image=session.get("image"),
+        prediction=session.get("prediction"),
+        confidence=session.get("confidence"),
+        prevention=session.get("prevention")
+    )
 
 
 #--------------- UPLOAD + PREDICT-----------------
