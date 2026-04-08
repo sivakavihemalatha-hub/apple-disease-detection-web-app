@@ -147,21 +147,16 @@ def signup():
 
 
 #----------------- DASHBOARD----------------
+
 @app.route("/dashboard")
 def dashboard():
     if "user_id" not in session:
         return redirect("/login")
 
-    return render_template(
-        "dashboard.html",
-        image=session.get("image"),
-        prediction=session.get("prediction"),
-        confidence=session.get("confidence"),
-        prevention=session.get("prevention")
-    )
-
+    return render_template("dashboard.html")
 
 #--------------- UPLOAD + PREDICT-----------------
+
 @app.route("/upload", methods=["POST"])
 def upload():
 
@@ -176,17 +171,20 @@ def upload():
         if file is None or file.filename == "":
             return "❌ No file selected"
 
+        # Save file
         filename = datetime.now().strftime("%Y%m%d%H%M%S") + "_" + file.filename
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         file.save(filepath)
 
-        print("✅ File saved")
+        print("✅ File saved:", filepath)
 
+        # Image preprocessing
         img = Image.open(filepath).convert("RGB")
         img = img.resize((224, 224))
         img = np.array(img) / 255.0
         img = np.expand_dims(img, axis=0)
 
+        # Prediction
         preds = model.predict(img)[0]
         idx = np.argmax(preds)
 
@@ -201,11 +199,12 @@ def upload():
             "Powdery Mildew": "Use sulfur spray."
         }
 
-        prevention = prevention_dict[prediction]
+        prevention = prevention_dict.get(prediction, "No advice available")
 
+        # Save path for HTML
         db_image_path = "static/uploads/" + filename
 
-        # ✅ SAVE IN DATABASE
+        # Save to database
         conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
 
@@ -223,19 +222,20 @@ def upload():
         conn.commit()
         conn.close()
 
-        # ⭐ IMPORTANT: STORE IN SESSION
-        session["image"] = db_image_path
-        session["prediction"] = prediction
-        session["confidence"] = confidence
-        session["prevention"] = prevention
+        print("💾 Saved to DB")
 
-        print("💾 Stored in session")
-
-        return redirect("/dashboard")
+        # ⭐ IMPORTANT FIX (NO SESSION, DIRECT RENDER)
+        return render_template(
+            "dashboard.html",
+            image=db_image_path,
+            prediction=prediction,
+            confidence=confidence,
+            prevention=prevention
+        )
 
     except Exception as e:
         print("❌ ERROR:", str(e))
-        return str(e)
+        return f"ERROR: {str(e)}"
 
 #--------------- USER HISTORY--------------------
 @app.route("/history")
