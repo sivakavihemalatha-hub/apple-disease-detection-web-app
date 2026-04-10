@@ -3,6 +3,13 @@
 
 <h2>Dashboard</h2>
 
+<!-- ================= ERROR MESSAGE ================= -->
+{% if error %}
+<div style="background:#dc2626; padding:12px; border-radius:10px; margin-bottom:15px; text-align:center;">
+    {{ error }}
+</div>
+{% endif %}
+
 <!-- ================= UPLOAD FORM ================= -->
 <div class="card" style="max-width:500px; margin-bottom:20px;">
     <form method="POST" action="/upload" enctype="multipart/form-data">
@@ -12,14 +19,13 @@
 </div>
 
 <!-- ================= RESULT SECTION ================= -->
-
 {% if prediction %}
 
 <div class="card" style="text-align:center;">
 
     <h2>Prediction Result</h2>
 
-    <img src="{{ image }}" width="220" style="border-radius:10px;">
+    <img src="{{ image }}" width="220" style="border-radius:10px; margin:10px 0;">
 
     <h3>Prediction: {{ prediction }}</h3>
 
