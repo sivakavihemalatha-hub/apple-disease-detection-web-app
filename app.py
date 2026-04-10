@@ -161,44 +161,65 @@ def dashboard():
         prevention=session.pop("prevention", None)
     )
 
-
 # ================= UPLOAD + PREDICT =================
+
 @app.route("/upload", methods=["POST"])
 def upload():
+    step = "START"
+
     try:
+        step = "Session Check"
         if "user_id" not in session:
-            return redirect("/login")
-
-        # ✅ CHECK FILE
-        file = request.files.get("file")
-
-        if not file or file.filename == "":
-            session["error"] = "Please select an image"
+            session["error"] = "Session expired"
             return redirect("/dashboard")
 
-        # ✅ ENSURE FOLDER EXISTS (VERY IMPORTANT FOR RENDER)
+        step = "File Fetch"
+        if "file" not in request.files:
+            session["error"] = "File not found in request"
+            return redirect("/dashboard")
+
+        file = request.files["file"]
+
+        step = "Filename Check"
+        if file.filename == "":
+            session["error"] = "No file selected"
+            return redirect("/dashboard")
+
+        step = "Create Folder"
         os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
-        # ✅ SAVE FILE
+        step = "Saving File"
         filename = datetime.now().strftime("%Y%m%d%H%M%S") + "_" + file.filename
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         file.save(filepath)
 
-        # ✅ IMAGE PROCESSING
+        if not os.path.exists(filepath):
+            session["error"] = "File not saved"
+            return redirect("/dashboard")
+
+        step = "Image Open"
         img = Image.open(filepath).convert("RGB")
+
+        step = "Resize"
         img = img.resize((224, 224))
+
+        step = "Numpy Convert"
         img = np.array(img) / 255.0
+
+        step = "Expand Dims"
         img = np.expand_dims(img, axis=0)
 
-        # ✅ MODEL PREDICTION
+        step = "Model Predict"
         preds = model.predict(img)
-        preds = preds[0]
 
+        step = "Prediction Process"
+        preds = preds[0]
         idx = np.argmax(preds)
+
         prediction = class_names[idx]
         confidence = str(round(float(np.max(preds)) * 100, 2)) + "%"
 
-        # ✅ PREVENTION
+        step = "Prevention"
         prevention_dict = {
             "Anthracnose": "Remove infected parts and use fungicide.",
             "Black Pox": "Apply fungicide regularly.",
@@ -206,14 +227,13 @@ def upload():
             "Healthy": "No disease detected.",
             "Powdery Mildew": "Use sulfur spray."
         }
-
         prevention = prevention_dict.get(prediction, "No advice")
 
-        db_image_path = "static/uploads/" + filename
-
-        # ✅ DATABASE SAVE
+        step = "DB Save"
         conn = sqlite3.connect(DB_PATH)
         cur = conn.cursor()
+
+        db_image_path = "static/uploads/" + filename
 
         cur.execute("""
             INSERT INTO history (username, image, prediction, confidence, date)
@@ -229,7 +249,7 @@ def upload():
         conn.commit()
         conn.close()
 
-        # ✅ STORE RESULTS IN SESSION
+        step = "Store Session"
         session["image"] = db_image_path
         session["prediction"] = prediction
         session["confidence"] = confidence
@@ -238,8 +258,9 @@ def upload():
         return redirect("/dashboard")
 
     except Exception as e:
-        session["error"] = str(e)
+        session["error"] = f"Error at [{step}] → {str(e)}"
         return redirect("/dashboard")
+
 # ================= HISTORY =================
 @app.route("/history")
 def history():
