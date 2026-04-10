@@ -154,57 +154,49 @@ def dashboard():
     return render_template("dashboard.html")
 
 # ================= UPLOAD + PREDICT =================
-# ================= UPLOAD DEBUG =================
+# ================= SAFE UPLOAD =================
 @app.route("/upload", methods=["POST"])
 def upload():
     try:
-        print("STEP 1: Route triggered")
+        # ✅ STEP 1: CHECK METHOD
+        if request.method != "POST":
+            return "INVALID REQUEST METHOD"
 
+        # ✅ STEP 2: CHECK SESSION
         if "user_id" not in session:
-            print("STEP 2: No session")
-            return "NO SESSION"
+            return "SESSION ERROR"
 
-        file = request.files.get("file")
+        # ✅ STEP 3: CHECK FILE KEY
+        if "file" not in request.files:
+            return "FILE KEY MISSING (form issue)"
 
-        if not file or file.filename == "":
-            print("STEP 3: No file")
-            return "NO FILE SELECTED"
+        file = request.files["file"]
 
-        print("STEP 4: File received:", file.filename)
+        # ✅ STEP 4: CHECK FILE NAME
+        if file.filename == "":
+            return "EMPTY FILE NAME"
 
-        # ✅ IMAGE PROCESSING TEST
+        # ✅ STEP 5: READ IMAGE SAFELY
         try:
-            img = Image.open(file).convert("RGB")
-            print("STEP 5: Image opened")
-
-            img = img.resize((224, 224))
-            print("STEP 6: Image resized")
-
-            img = np.array(img) / 255.0
-            img = np.expand_dims(img, axis=0)
-            print("STEP 7: Image processed")
-
+            img = Image.open(file.stream).convert("RGB")
         except Exception as e:
-            print("❌ IMAGE ERROR:", e)
-            return f"IMAGE ERROR: {str(e)}"
+            return f"IMAGE READ ERROR: {str(e)}"
 
-        # ✅ MODEL TEST
+        # ✅ STEP 6: PROCESS IMAGE
+        img = img.resize((224, 224))
+        img = np.array(img) / 255.0
+        img = np.expand_dims(img, axis=0)
+
+        # ✅ STEP 7: MODEL CHECK
         try:
-            print("STEP 8: Starting model prediction")
-
             preds = model.predict(img)
-
-            print("STEP 9: Model prediction done")
-
-            return f"MODEL WORKING ✅ Prediction shape: {preds.shape}"
-
         except Exception as e:
-            print("❌ MODEL ERROR:", e)
             return f"MODEL ERROR: {str(e)}"
 
+        return f"SUCCESS ✅ Model working, shape: {preds.shape}"
+
     except Exception as e:
-        print("❌ UNKNOWN ERROR:", e)
-        return f"UNKNOWN ERROR: {str(e)}"
+        return f"CRASH ERROR: {str(e)}"
 # ================= HISTORY =================
 @app.route("/history")
 def history():
