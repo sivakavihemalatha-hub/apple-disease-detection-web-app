@@ -171,7 +171,7 @@ def upload():
         if file.filename == "":
             return "NO FILE SELECTED"
 
-        # ✅ READ IMAGE SAFELY
+        # ✅ READ IMAGE
         try:
             img = Image.open(file.stream).convert("RGB")
         except Exception as e:
@@ -182,14 +182,40 @@ def upload():
         img = np.array(img) / 255.0
         img = np.expand_dims(img, axis=0)
 
-        # ✅ TEST BEFORE MODEL
         print("IMAGE READY")
 
-        # ❗ TEMP CHECK (IMPORTANT)
-        return "UPLOAD WORKING TILL MODEL"
+        # ✅ MODEL PREDICTION (FIXED)
+        try:
+            import tensorflow as tf
 
-        # ⛔ DO NOT RUN MODEL YET
-        # preds = model.predict(img)
+            with tf.device('/CPU:0'):
+                preds = model.predict(img, verbose=0)[0]
+
+            idx = np.argmax(preds)
+
+            prediction = class_names[idx]
+            confidence = str(round(float(np.max(preds)) * 100, 2)) + "%"
+
+            prevention_dict = {
+                "Anthracnose": "Remove infected parts and use fungicide.",
+                "Black Pox": "Apply fungicide regularly.",
+                "Black Rot": "Prune affected areas.",
+                "Healthy": "No disease detected.",
+                "Powdery Mildew": "Use sulfur spray."
+            }
+
+            prevention = prevention_dict.get(prediction, "No advice")
+
+            return render_template(
+                "dashboard.html",
+                image=None,
+                prediction=prediction,
+                confidence=confidence,
+                prevention=prevention
+            )
+
+        except Exception as e:
+            return f"MODEL ERROR: {str(e)}"
 
     except Exception as e:
         return f"ERROR: {str(e)}"
