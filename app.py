@@ -154,49 +154,45 @@ def dashboard():
     return render_template("dashboard.html")
 
 # ================= UPLOAD + PREDICT =================
-# ================= SAFE UPLOAD =================
+# ================= UPLOAD + PREDICT =================
 @app.route("/upload", methods=["POST"])
 def upload():
     try:
-        # ✅ STEP 1: CHECK METHOD
-        if request.method != "POST":
-            return "INVALID REQUEST METHOD"
-
-        # ✅ STEP 2: CHECK SESSION
+        # ✅ CHECK SESSION
         if "user_id" not in session:
             return "SESSION ERROR"
 
-        # ✅ STEP 3: CHECK FILE KEY
+        # ✅ CHECK FILE
         if "file" not in request.files:
-            return "FILE KEY MISSING (form issue)"
+            return "NO FILE KEY"
 
         file = request.files["file"]
 
-        # ✅ STEP 4: CHECK FILE NAME
         if file.filename == "":
-            return "EMPTY FILE NAME"
+            return "NO FILE SELECTED"
 
-        # ✅ STEP 5: READ IMAGE SAFELY
+        # ✅ READ IMAGE SAFELY
         try:
             img = Image.open(file.stream).convert("RGB")
         except Exception as e:
-            return f"IMAGE READ ERROR: {str(e)}"
+            return f"IMAGE ERROR: {str(e)}"
 
-        # ✅ STEP 6: PROCESS IMAGE
+        # ✅ PROCESS IMAGE
         img = img.resize((224, 224))
         img = np.array(img) / 255.0
         img = np.expand_dims(img, axis=0)
 
-        # ✅ STEP 7: MODEL CHECK
-        try:
-            preds = model.predict(img)
-        except Exception as e:
-            return f"MODEL ERROR: {str(e)}"
+        # ✅ TEST BEFORE MODEL
+        print("IMAGE READY")
 
-        return f"SUCCESS ✅ Model working, shape: {preds.shape}"
+        # ❗ TEMP CHECK (IMPORTANT)
+        return "UPLOAD WORKING TILL MODEL"
+
+        # ⛔ DO NOT RUN MODEL YET
+        # preds = model.predict(img)
 
     except Exception as e:
-        return f"CRASH ERROR: {str(e)}"
+        return f"ERROR: {str(e)}"
 # ================= HISTORY =================
 @app.route("/history")
 def history():
