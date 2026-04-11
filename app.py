@@ -138,14 +138,46 @@ def dashboard():
     if "user_id" not in session:
         return redirect("/login")
 
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+
+    # ✅ GET ONLY CURRENT USER LAST RESULT
+    cur.execute("""
+        SELECT image, prediction, confidence
+        FROM history
+        WHERE username=?
+        ORDER BY id DESC
+        LIMIT 1
+    """, (session["user_id"],))
+
+    last = cur.fetchone()
+    conn.close()
+
+    if last:
+        image, prediction, confidence = last
+    else:
+        image = prediction = confidence = None
+
+    # ✅ PREVENTION FIX (IMPORTANT PART)
+    prevention_dict = {
+        "Anthracnose": "Remove infected parts and use fungicide.",
+        "Black Pox": "Apply fungicide regularly.",
+        "Black Rot": "Prune affected areas.",
+        "Healthy": "No disease detected.",
+        "Powdery Mildew": "Use sulfur spray."
+    }
+
+    prevention = None
+    if prediction:
+        prevention = prevention_dict.get(prediction)
+
     return render_template(
         "dashboard.html",
-        prediction=None,
-        confidence=None,
-        prevention=None,
-        image=None
+        image=image,
+        prediction=prediction,
+        confidence=confidence,
+        prevention=prevention
     )
-
 # ================= UPLOAD + PREDICT =================
 @app.route("/upload", methods=["POST"])
 def upload():
