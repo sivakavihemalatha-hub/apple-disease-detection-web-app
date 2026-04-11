@@ -162,7 +162,7 @@ def dashboard():
 # ================= UPLOAD + PREDICT =================
 @app.route("/upload", methods=["POST"])
 def upload():
-    log = []  # 🔥 step tracking
+    log = []
 
     try:
         log.append("1. Request received")
@@ -192,52 +192,42 @@ def upload():
             log.append("❌ MODEL NOT LOADED")
             return "<br>".join(log)
 
-        log.append("4. Model is loaded")
+        log.append("4. Model loaded")
 
         # ✅ IMAGE LOAD
         try:
             img = Image.open(file).convert("RGB")
-            log.append("5. Image opened successfully")
+            log.append("5. Image opened")
         except Exception as e:
             log.append("❌ Image error: " + str(e))
             return "<br>".join(log)
 
         # ✅ RESIZE
+        img = img.resize((224, 224))
+        log.append("6. Image resized")
+
+        # ✅ ARRAY
+        img_array = np.array(img) / 255.0
+        img_array = np.expand_dims(img_array, axis=0)
+        log.append("7. Array shape: " + str(img_array.shape))
+
+        # ✅ SAFE PREDICTION (MAIN FIX)
         try:
-            img = img.resize((224, 224))
-            log.append("6. Image resized to 224x224")
+            preds = model.predict(img_array)
+            log.append("8. Prediction success")
         except Exception as e:
-            log.append("❌ Resize error: " + str(e))
+            log.append("❌ Prediction crash: " + str(e))
             return "<br>".join(log)
 
-        # ✅ ARRAY CONVERSION
-        try:
-            img_array = np.array(img) / 255.0
-            img_array = np.expand_dims(img_array, axis=0)
-            log.append("7. Image converted to array: " + str(img_array.shape))
-        except Exception as e:
-            log.append("❌ Array error: " + str(e))
-            return "<br>".join(log)
-
-        # ✅ PREDICTION
-        try:
-            preds = model.predict(img_array, verbose=0)
-            log.append("8. Prediction done")
-            log.append("Raw output: " + str(preds))
-        except Exception as e:
-            log.append("❌ Prediction error: " + str(e))
-            return "<br>".join(log)
-
-        # ✅ RESULT EXTRACTION
+        # ✅ RESULT
         try:
             idx = np.argmax(preds[0])
             prediction = class_names[idx]
             confidence = str(round(float(np.max(preds)) * 100, 2)) + "%"
-
-            log.append(f"9. Prediction: {prediction}")
-            log.append(f"10. Confidence: {confidence}")
+            log.append("9. Prediction: " + prediction)
+            log.append("10. Confidence: " + confidence)
         except Exception as e:
-            log.append("❌ Result processing error: " + str(e))
+            log.append("❌ Result error: " + str(e))
             return "<br>".join(log)
 
         # ✅ SAVE IMAGE
@@ -245,7 +235,7 @@ def upload():
             filename = datetime.now().strftime("%Y%m%d%H%M%S") + ".jpg"
             filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
             img.save(filepath)
-            log.append("11. Image saved: " + filename)
+            log.append("11. Image saved")
         except Exception as e:
             log.append("❌ Save error: " + str(e))
             return "<br>".join(log)
@@ -257,7 +247,6 @@ def upload():
     except Exception as e:
         log.append("🔥 FINAL ERROR: " + str(e))
         return "<br>".join(log)
-        
     
 # ================= HISTORY =================
 @app.route("/history")
@@ -345,4 +334,4 @@ def logout():
 # ================= RUN =================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)
