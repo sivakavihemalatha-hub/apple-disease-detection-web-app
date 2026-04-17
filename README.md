@@ -117,7 +117,7 @@ It contains labeled images across the following classes:
 - Admin login  
 - View all user predictions  
 - Manage system history  
-- Admin can delete records from all users' history. 
+- Admin can delete records from all users' history  
 - Monitor users  
 
 ---
@@ -195,15 +195,47 @@ It contains labeled images across the following classes:
 
 ---
 
-## 📸 User Interface Pages
+## 📸 User Interface
 
-- Home Page  
-- Login Page  
-- Signup Page  
-- Dashboard (Prediction Screen)  
-- History Page  
-- Profile Page  
-- Admin Panel  
+### 🏠 Home Page
+<p align="center">
+  <img src="Screenshots/HomePage.png" width="600">
+</p>
+
+### 🔐 Login Page
+<p align="center">
+  <img src="Screenshots/Login.png" width="600">
+</p>
+
+### 📝 Signup Page
+<p align="center">
+  <img src="Screenshots/Signup.png" width="600">
+</p>
+
+### 📊 Dashboard
+<p align="center">
+  <img src="Screenshots/dashboard.png" width="600">
+</p>
+
+### 📜 User History
+<p align="center">
+  <img src="Screenshots/History.png" width="600">
+</p>
+
+### 👤 Profile Page
+<p align="center">
+  <img src="Screenshots/Profile.png" width="600">
+</p>
+
+### 🧑‍💼 Admin Dashboard
+<p align="center">
+  <img src="Screenshots/admin_dashboard.png" width="600">
+</p>
+
+### 📂 All Users History
+<p align="center">
+  <img src="Screenshots/All_Users_History.png" width="600">
+</p>
 
 ---
 
