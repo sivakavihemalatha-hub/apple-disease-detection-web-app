@@ -4,161 +4,210 @@
   <img src="Apple_demo.png" width="700">
 </p>
 
+> An AI-powered Flask web application that detects apple fruit diseases using an EfficientNet-based CNN model with high accuracy.
+
+---
+
+## 🏆 Key Highlights
+- ✅ Achieved **87% validation accuracy**
+- 🍏 Supports **5 disease classes**
+- 🤖 Built using **EfficientNet-based CNN**
+- 🌐 Integrated with **Flask Web Application**
+- 👥 Includes **User & Admin modules**
+- 🗄️ Stores prediction **history using SQLite**
+
+---
 
 ## 📌 Project Overview
-This project is an AI-based web application that detects diseases in apple fruits using Deep Learning (EfficientNet-based CNN model). Users can upload apple fruit images and the system predicts the disease along with confidence score and prevention steps.
+This project is a Machine Learning-powered web application that detects diseases in apple fruits from images. Users can upload an image, and the system predicts the disease along with a confidence score.
 
-The system also includes user authentication, role-based access (Admin/User), prediction history, and profile management.
-
----
-
-## 🧠 Objective
-To help farmers and users identify apple fruit diseases at an early stage using an automated AI system, improving crop quality and reducing losses.
+It combines Deep Learning with a full-stack web interface, making it practical for real-world usage.
 
 ---
 
-## 📊 Dataset Collection
+## 🎯 Objective / Problem Statement
+Manual detection of fruit diseases is time-consuming and requires expert knowledge. This project aims to:
+
+- Automate disease detection using AI  
+- Provide early diagnosis for better crop management  
+- Reduce agricultural losses  
+- Make technology accessible to farmers and users  
+
+---
+
+## 📊 Dataset Description
 The dataset was collected from multiple sources:
-- Kaggle
-- Mendeley
-- Other agricultural image datasets
+- Kaggle  
+- Mendeley  
+- Agricultural image datasets  
 
-It includes labeled images of apple fruits under different disease categories.
+It contains labeled images across the following classes:
+- Anthracnose  
+- Black Pox  
+- Black Rot  
+- Healthy  
+- Powdery Mildew  
 
 ---
 
 ## 🤖 Machine Learning Model
 
-- Model Type: Convolutional Neural Network (CNN)
-- Architecture: EfficientNet-based model
-- Framework: TensorFlow / Keras
-- Training Platform: Google Colab
-- Model Format: `.keras`
-
-### 📈 Performance Metrics:
-- Training Accuracy: ~85%
-- Validation Accuracy: ~87%
-
-### 📊 Classification Report:
-
-| Class            | Precision | Recall | F1-score | Support |
-|------------------|----------|--------|----------|---------|
-| Anthracnose      | 0.66     | 0.75   | 0.70     | 69      |
-| Black Pox        | 0.97     | 0.97   | 0.97     | 92      |
-| Black Rot        | 0.82     | 0.74   | 0.78     | 134     |
-| Healthy          | 0.95     | 0.94   | 0.95     | 143     |
-| Powdery Mildew   | 0.91     | 0.94   | 0.92     | 104     |
-
-Overall Accuracy: **87%**
+- **Model Type:** Convolutional Neural Network (CNN)  
+- **Architecture:** EfficientNet  
+- **Framework:** TensorFlow / Keras  
+- **Training Platform:** Google Colab  
+- **Input Size:** 224 × 224  
+- **Model Format:** `.keras`  
 
 ---
 
-## 🛠️ Technologies Used
+## 📈 Model Performance
 
-### 🔹 Frontend:
-- HTML
-- CSS
-- JavaScript
+### 📌 Overall Metrics
+- **Accuracy:** 87%  
+- **Precision (avg):** 86%  
+- **Recall (avg):** 87%  
+- **F1-Score (avg):** 86%  
 
-### 🔹 Backend:
-- Python (Flask Framework)
-- SQLite Database
+### 📊 Classification Report
 
-### 🔹 Machine Learning:
-- TensorFlow / Keras
-- EfficientNet
-- NumPy
-- PIL (Image Processing)
+| Class            | Precision | Recall | F1-score | Support |
+|------------------|----------|--------|----------|---------|
+| Anthracnose      | 66%      | 75%    | 70%      | 69      |
+| Black Pox        | 97%      | 97%    | 97%      | 92      |
+| Black Rot        | 82%      | 74%    | 78%      | 134     |
+| Healthy          | 95%      | 94%    | 95%      | 143     |
+| Powdery Mildew   | 91%      | 94%    | 92%      | 104     |
 
-### 🔹 Deployment:
-- Google Colab (Model Training)
-- Ngrok (Public Flask URL)
+📖 **Metric Explanation:**
+- **Precision:** Correctness of positive predictions  
+- **Recall:** Ability to identify all relevant cases  
+- **F1-Score:** Balance between precision and recall  
+
+---
+
+### 🔹 Confusion Matrix
+<p align="center">
+  <img src="confusion_matrix.png" width="500">
+</p>
+
+### 🔹 Training vs Validation Accuracy
+<p align="center">
+  <img src="accuracy_plot.png" width="500">
+</p>
+
+### 🔹 Training vs Validation Loss
+<p align="center">
+  <img src="loss_plot.png" width="500">
+</p>
 
 ---
 
 ## 🌐 Web Application Features
 
-### 👤 User Features:
-- User Signup & Login
-- Upload apple fruit image
-- Get disease prediction
-- View prediction history
-- Profile management
-- Logout system
+### 👤 User Features
+- User Signup & Login  
+- Upload apple fruit image  
+- Get disease prediction with confidence score  
+- View prediction history  
+- Profile management  
+- Logout system  
 
-### 🧑‍💼 Admin Features:
-- Admin login
-- View all user predictions
-- Manage system history
-- Admin can delete user records from the database (history table) when required.
-- Monitor users
+### 🧑‍💼 Admin Features
+- Admin login  
+- View all user predictions  
+- Manage system history  
+- Delete records from database  
+- Monitor users  
 
 ---
 
 ## 🔁 System Workflow
 
-1. User registers / logs in
-2. Uploads apple fruit image
-3. Image is preprocessed (224x224 resize + normalization)
-4. EfficientNet-based CNN model predicts disease
-5. Result is displayed with confidence score
-6. Data is stored in SQLite database
-7. User can view history in dashboard
+1. User registers or logs in  
+2. Uploads apple fruit image  
+3. Image is resized to **224×224** and normalized  
+4. Model processes the image  
+5. Disease prediction is generated  
+6. Confidence score is displayed  
+7. Result stored in SQLite database  
+8. User can view history in dashboard  
 
 ---
 
 ## 🧪 Model Pipeline
 
-- Input Image → Resize (224x224)
-- Preprocessing using EfficientNet
-- Feature extraction using CNN layers
-- Softmax classification
-- Output: Disease label + confidence
+- Input Image → Resize (224×224)  
+- Preprocessing (EfficientNet)  
+- Feature Extraction (CNN Layers)  
+- Softmax Classification  
+- Output: Disease Label + Confidence Score  
 
 ---
 
-## 🗄️ Database Design (SQLite)
+## 🛠️ Tech Stack
 
-### Users Table:
-- id
-- email
-- password
-- role (admin/user)
+### 🔹 Frontend
+- HTML  
+- CSS  
+- JavaScript  
 
-### History Table:
-- id
-- username (email)
-- image path
-- prediction
-- confidence
-- date
+### 🔹 Backend
+- Python (Flask Framework)  
+- SQLite Database  
+
+### 🔹 Machine Learning
+- TensorFlow / Keras  
+- EfficientNet  
+- NumPy  
+- PIL (Image Processing)  
+
+### 🔹 Deployment
+- Google Colab (Model Training)  
+- Ngrok (Public URL)  
+
+---
+
+## 🗄️ Database Design
+
+### Users Table
+- id  
+- email  
+- password  
+- role (admin/user)  
+
+### History Table
+- id  
+- username  
+- image path  
+- prediction  
+- confidence  
+- date  
 
 ---
 
 ## 🚀 Deployment
 
-- Flask backend hosted locally
-- Ngrok used for public URL access
-- Model trained in Google Colab
-- `.keras` model integrated into Flask
+- Flask app runs locally  
+- Ngrok used for public access  
+- Model trained using Google Colab  
+- `.keras` model integrated into backend  
 
 ---
 
-## 📸 User Interface (UI)
+## 📸 User Interface Pages
 
-The system includes:
-
-- Home Page
-- Login Page
-- Signup Page
-- Dashboard (Prediction screen)
-- History Page
-- Profile Page
-- Admin Panel
+- Home Page  
+- Login Page  
+- Signup Page  
+- Dashboard (Prediction Screen)  
+- History Page  
+- Profile Page  
+- Admin Panel  
 
 ---
-
 
 ## 👤 Author
-- HEMALATHA SIVAKAI
-- Email: sivakavihemalatha@gmail.com
+
+**HEMALATHA SIVAKAI**  
+📧 Email: sivakavihemalatha@gmail.com  
