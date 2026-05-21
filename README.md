@@ -4,34 +4,44 @@
   <img src="Apple_demo.png" width="700">
 </p>
 
-> An AI-powered Flask web application that detects apple fruit diseases using an EfficientNet-based CNN model with high accuracy.
+> 🚀 An AI-powered Flask web application that detects apple fruit diseases using an EfficientNet-based CNN model with high accuracy and real-time prediction capability.
+
+---
+
+## 🔗 Project Links
+- 💻 GitHub Repository: https://github.com/sivakavihemalatha-hub/apple-disease-detection-web-app  
+- 🎥 Demo Video (Ngrok): *(Add your recorded video link or hosted video here)*  
 
 ---
 
 ## 🏆 Key Highlights
-- ✅ Achieved **87% validation accuracy**
-- 🍏 Supports **5 disease classes**
-- 🤖 Built using **EfficientNet-based CNN**
-- 🌐 Integrated with **Flask Web Application**
-- 👥 Includes **User & Admin modules**
-- 🗄️ Stores prediction **history using SQLite**
+- 🍎 Detects **5 apple fruit disease classes**
+- 🤖 Built using **EfficientNet-based CNN model**
+- 🌐 Flask-based full-stack web application
+- 👤 User & Admin authentication system
+- 📊 Prediction history tracking with database
+- 🗄️ SQLite integration for data storage
+- ⚡ Real-time image upload and prediction system
 
 ---
 
 ## 📌 Project Overview
-This project is a Machine Learning-powered web application that detects diseases in apple fruits from images. Users can upload an image, and the system predicts the disease along with a confidence score.
+This project is a machine learning-based web application that detects diseases in **apple fruits from images**.  
+Users upload an image, and the trained deep learning model predicts the disease category along with a confidence score.
 
-It combines Deep Learning with a full-stack web interface, making it practical for real-world usage.
+It combines **Computer Vision, Deep Learning, and Web Development** to deliver an end-to-end AI solution for agricultural disease detection.
 
 ---
 
 ## 🎯 Objective / Problem Statement
-Manual detection of fruit diseases is time-consuming and requires expert knowledge. This project aims to:
+Manual identification of fruit diseases is time-consuming and requires expert agricultural knowledge.  
+This system automates the process using Artificial Intelligence.
 
-- Automate disease detection using AI  
-- Provide early diagnosis for better crop management  
-- Reduce agricultural losses  
-- Make technology accessible to farmers and users  
+### Goals:
+- Automate apple fruit disease detection using AI  
+- Reduce manual inspection time  
+- Enable early disease identification  
+- Improve agricultural productivity using technology  
 
 ---
 
@@ -41,7 +51,7 @@ The dataset was collected from multiple sources:
 - Mendeley  
 - Agricultural image datasets  
 
-It contains labeled images across the following classes:
+### Disease Classes:
 - Anthracnose  
 - Black Pox  
 - Black Rot  
@@ -56,18 +66,19 @@ It contains labeled images across the following classes:
 - **Architecture:** EfficientNet  
 - **Framework:** TensorFlow / Keras  
 - **Training Platform:** Google Colab  
-- **Input Size:** 224 × 224  
-- **Model Format:** `.keras`  
+- **Input Size:** 224 × 224 pixels  
+- **Model Format:** `.keras` file  
+- **Validation Accuracy:** 87%  
 
 ---
 
 ## 📈 Model Performance
 
-### 📌 Overall Metrics
-- **Accuracy:** 87%  
-- **Precision (avg):** 86%  
-- **Recall (avg):** 87%  
-- **F1-Score (avg):** 86%  
+### 📌 Metrics
+- Accuracy: **87%**
+- Precision (avg): 86%
+- Recall (avg): 87%
+- F1-score (avg): 86%
 
 ### 📊 Classification Report
 
@@ -79,69 +90,36 @@ It contains labeled images across the following classes:
 | Healthy          | 95%      | 94%    | 95%      | 143     |
 | Powdery Mildew   | 91%      | 94%    | 92%      | 104     |
 
-📖 **Metric Explanation:**
-- **Precision:** Correctness of positive predictions  
-- **Recall:** Ability to identify all relevant cases  
-- **F1-Score:** Balance between precision and recall  
-
----
-
-### 🔹 Confusion Matrix
-<p align="center">
-  <img src="Confusion_Matrix.png" width="500">
-</p>
-
-### 🔹 Training vs Validation Accuracy
-<p align="center">
-  <img src="Training_Validation_Accuracy.png" width="500">
-</p>
-
-### 🔹 Training vs Validation Loss
-<p align="center">
-  <img src="Training_Validation_Loss.png" width="500">
-</p>
-
----
-
-## 🌐 Web Application Features
-
-### 👤 User Features
-- User Signup & Login  
-- Upload apple fruit image  
-- Get disease prediction with confidence score  
-- View prediction history  
-- Profile management  
-- Logout system  
-
-### 🧑‍💼 Admin Features
-- Admin login  
-- View all user predictions  
-- Manage system history  
-- Admin can delete records from all users' history  
-- Monitor users  
-
 ---
 
 ## 🔁 System Workflow
 
 1. User registers or logs in  
 2. Uploads apple fruit image  
-3. Image is resized to **224×224** and normalized  
-4. Model processes the image  
-5. Disease prediction is generated  
-6. Confidence score is displayed  
-7. Result stored in SQLite database  
-8. User can view history in dashboard  
+3. Image is resized to 224×224  
+4. Preprocessing and normalization applied  
+5. EfficientNet model processes image  
+6. Disease prediction generated  
+7. Confidence score displayed  
+8. Result stored in SQLite database  
+9. User can view prediction history  
 
 ---
 
-## 🧪 Model Pipeline
+## 🌐 Web Application Features
 
-- Input Image → Resize (224×224)  
-- Preprocessing (EfficientNet)  
-- Feature Extraction (CNN Layers)  
-- Softmax Classification  
-- Output: Disease Label + Confidence Score  
+### 👤 User Features
+- User registration & login  
+- Upload apple fruit images  
+- Get real-time disease prediction  
+- View prediction history  
+- Profile management  
+
+### 🧑‍💼 Admin Features
+- Admin login  
+- View all user predictions  
+- Manage system records  
+- Monitor user activity  
 
 ---
 
@@ -157,14 +135,15 @@ It contains labeled images across the following classes:
 - SQLite Database  
 
 ### 🔹 Machine Learning
-- TensorFlow / Keras  
+- TensorFlow  
+- Keras  
 - EfficientNet  
 - NumPy  
-- PIL (Image Processing)  
+- PIL  
 
 ### 🔹 Deployment
 - Google Colab (Model Training)  
-- Ngrok (Public URL)  
+- Ngrok (Public tunnel for demo)  
 
 ---
 
@@ -182,20 +161,20 @@ It contains labeled images across the following classes:
 - image path  
 - prediction  
 - confidence  
-- date  
+- timestamp  
 
 ---
 
-## 🚀 Deployment
+## 🎥 Demo (Ngrok Deployment)
+- Application was deployed using **Ngrok tunnel**
+- Allows real-time web access during development
+- Demonstrates live image upload and prediction system
 
-- Flask app runs locally  
-- Ngrok used for public access  
-- Model trained using Google Colab  
-- `.keras` model integrated into backend  
+👉 *(Add your demo video link here)*
 
 ---
 
-## 📸 User Interface
+## 📸 Screenshots
 
 ### 🏠 Home Page
 <p align="center">
@@ -229,7 +208,7 @@ It contains labeled images across the following classes:
 
 ### 🧑‍💼 Admin Dashboard
 <p align="center">
-  <img src="Screenshots/Admin_dashboard.png" width="600">
+  <img src="Screenshots/Admin_Dashboard.png" width="600">
 </p>
 
 ### 📂 All Users History
@@ -239,7 +218,26 @@ It contains labeled images across the following classes:
 
 ---
 
-## 👤 Author
+## 💡 Impact
+This system helps in **early detection of apple fruit diseases**, reducing agricultural loss and enabling AI-based smart farming solutions.
 
-**HEMALATHA SIVAKAI**  
+---
+
+## 🚀 Future Improvements
+- Improve model accuracy with larger datasets  
+- Deploy on cloud platforms (AWS / Render / Hugging Face Spaces)  
+- Add mobile application version  
+- Extend to other fruit disease detection systems  
+
+---
+
+## 👨‍💻 Author
+
+**Hemalatha Sivakavi**  
 📧 Email: sivakavihemalatha@gmail.com  
+💻 GitHub: https://github.com/sivakavihemalatha-hub  
+
+---
+
+## ⭐ Note
+If you find this project useful, please give a ⭐ to the repository.
