@@ -45,7 +45,7 @@ This project aims to automate apple fruit disease detection using Artificial Int
   https://github.com/sivakavihemalatha-hub/apple-disease-detection-web-app
 
 - 🎥 **Project Demo Video**  
-  https://drive.google.com/file/d/11TN6q_NIrTfSdLQid7UGX-mlCglYVNWE/view?usp=drive_link
+  https://drive.google.com/file/d/1dTBAJdpY7N-VuVmekki6PGfCMLPa0rbB/view?usp=sharing
 
 ---
 
@@ -232,7 +232,7 @@ The demo video showcases:
 - Role-based access control
 
 ▶️ **Demo Video**  
- https://drive.google.com/file/d/11TN6q_NIrTfSdLQid7UGX-mlCglYVNWE/view?usp=drive_link
+ https://drive.google.com/file/d/1dTBAJdpY7N-VuVmekki6PGfCMLPa0rbB/view?usp=sharing
 ---
 
 # 📸 Application Screenshots
