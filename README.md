@@ -98,7 +98,7 @@ It contains labeled images across the following classes:
 
 ### 🔹 Training vs Validation Loss
 <p align="center">
-  <img src="Training_validation_Loss.png" width="500">
+  <img src="Training_Validation_Loss.png" width="500">
 </p>
 
 ---
@@ -229,7 +229,7 @@ It contains labeled images across the following classes:
 
 ### 🧑‍💼 Admin Dashboard
 <p align="center">
-  <img src="Screenshots/admin_dashboard.png" width="600">
+  <img src="Screenshots/Admin_dashboard.png" width="600">
 </p>
 
 ### 📂 All Users History
