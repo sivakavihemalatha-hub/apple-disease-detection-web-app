@@ -39,13 +39,30 @@ This project aims to automate apple fruit disease detection using Artificial Int
 
 ---
 
-# 🔗 Project Links
+## 🔗 Project Links
 
-- 💻 **GitHub Repository**  
-  https://github.com/sivakavihemalatha-hub/apple-disease-detection-web-app
+<p align="center">
 
-- 🎥 **Project Demo Video**  
-  https://drive.google.com/file/d/1dTBAJdpY7N-VuVmekki6PGfCMLPa0rbB/view?usp=sharing
+<a href="https://github.com/sivakavihemalatha-hub/apple-disease-detection-web-app">
+  <img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github" alt="GitHub Repository">
+</a>
+
+<a href="https://drive.google.com/file/d/1dTBAJdpY7N-VuVmekki6PGfCMLPa0rbB/view?usp=sharing">
+  <img src="https://img.shields.io/badge/Project-Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="Project Demo">
+</a>
+
+<a href="https://github.com/sivakavihemalatha-hub">
+  <img src="https://img.shields.io/badge/GitHub-Profile-181717?style=for-the-badge&logo=github" alt="GitHub Profile">
+</a>
+
+<a href="https://www.linkedin.com/in/sivakavihemalatha">
+  <img src="https://img.shields.io/badge/LinkedIn-Profile-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn Profile">
+</a>
+
+</p>
+
+---
+
 
 ---
 
