@@ -44,24 +44,22 @@ This project aims to automate apple fruit disease detection using Artificial Int
 <p align="center">
 
 <a href="https://github.com/sivakavihemalatha-hub/apple-disease-detection-web-app">
-  <img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github" alt="GitHub Repository">
+  <img src="https://img.shields.io/badge/💻_Source_Code-GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="Source Code">
 </a>
 
 <a href="https://drive.google.com/file/d/1dTBAJdpY7N-VuVmekki6PGfCMLPa0rbB/view?usp=sharing">
-  <img src="https://img.shields.io/badge/Project-Demo-FF0000?style=for-the-badge&logo=youtube&logoColor=white" alt="Project Demo">
+  <img src="https://img.shields.io/badge/🎥_Live_Demo-Project-red?style=for-the-badge&logo=youtube&logoColor=white" alt="Project Demo">
 </a>
 
 <a href="https://github.com/sivakavihemalatha-hub">
-  <img src="https://img.shields.io/badge/GitHub-Profile-181717?style=for-the-badge&logo=github" alt="GitHub Profile">
+  <img src="https://img.shields.io/badge/🐙_GitHub-Profile-24292F?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Profile">
 </a>
 
 <a href="https://www.linkedin.com/in/sivakavihemalatha">
-  <img src="https://img.shields.io/badge/LinkedIn-Profile-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn Profile">
+  <img src="https://img.shields.io/badge/💼_LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
 </a>
 
 </p>
-
----
 
 
 ---
